@@ -1,0 +1,60 @@
+import sys
+import math
+
+# Optimasi input agar pembacaan data super cepat di Python
+input = sys.stdin.read
+
+def main():
+    # 1. Ambil semua input sekaligus dari juri
+    input_data = input().split()
+    if not input_data:
+        return
+    
+    n = int(input_data[0])
+    queries = [int(x) for x in input_data[1:n+1]]
+    
+    # Mencari nilai t terbesar dari seluruh input untuk menentukan ukuran wadah Sieve
+    max_t = max(queries) if queries else 0
+    
+    # 2. Tentukan batas pencarian tertinggi menggunakan rumus Pierre Dusart
+    # Jika max_t kecil (di bawah 6), kita beri batas aman minimal yaitu 15
+    if max_t < 6:
+        BATAS_MAKS = 15
+    else:
+        # Rumus jaring pengaman: t * (ln(t) + ln(ln(t)))
+        batas_float = max_t * (math.log(max_t) + math.log(math.log(max_t)))
+        BATAS_MAKS = math.ceil(batas_float) + 10 # Ditambah 10 sebagai margin aman
+    
+    # 3. JALANKAN PERULANGAN SIEVE (CUKUP 1 KALI SAJA)
+    wadah = [True] * (BATAS_MAKS + 1)
+    wadah[0] = wadah[1] = False
+    
+    limit_sieve = math.ceil(math.sqrt(BATAS_MAKS))
+    for p in range(2, limit_sieve + 1):
+        if wadah[p] == True:
+            for k in range(p * p, BATAS_MAKS + 1, p):
+                wadah[k] = False
+                
+    # 4. Kumpulkan semua angka prima yang lolos saringan ke dalam daftar_prima
+    # Indeks 0 diisi angka 0 sebagai hiasan agar prima ke-1 pas berada di indeks 1
+    daftar_prima = [0]
+    for k in range(2, BATAS_MAKS + 1):
+        if wadah[k] == True:
+            daftar_prima.append(k)
+            
+    # 5. Jawab semua query secara instan tanpa perlu perulangan Sieve lagi
+    hasil_output = []
+    for t in queries:
+        if t < 6:
+            # Skenario manual untuk angka di bawah 6 agar aman dari eror rumus
+            prima_manual = [0, 2, 3, 5, 7, 11]
+            hasil_output.append(str(prima_manual[t]))
+        else:
+            hasil_output.append(str(daftar_prima[t]))
+            
+    # 6. Cetak semua jawaban sekaligus ke layar
+    sys.stdout.write("\n".join(hasil_output) + "\n")
+
+if __name__ == '__main__':
+    main()
+
